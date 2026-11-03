@@ -1,0 +1,6 @@
+キーキャップ工房（ウェブ版）が使っている部品
+
+- フォント（fonts/）：SIL Open Font License 1.1。各フォントの許諾文は fonts/OFL-*.txt
+- three.js：MIT License（vendor/LICENSE-three.txt）
+- manifold：Apache License 2.0（vendor/LICENSE-manifold.txt）
+- Pyodide（jsDelivr から読み込み）：Mozilla Public License 2.0
