@@ -32,10 +32,10 @@
 <div id="gate">
   <form id="f" autocomplete="on">
     <h1>キーキャップ工房</h1>
-    <p>パスワードを入れてください</p>
+    <p>3D プリンターで刷るキーキャップを作る道具です。配った人から聞いたパスワードで開きます。</p>
     <input type="text" name="username" value="keycap" autocomplete="username" hidden>
     <label for="pw">パスワード</label>
-    <input type="password" id="pw" autocomplete="current-password" required autofocus>
+    <input type="password" id="pw" autocomplete="current-password" required autofocus aria-describedby="err">
     <label class="remember"><input type="checkbox" id="remember"> この端末で覚えておく</label>
     <button id="go">開く</button>
     <div class="err" id="err" role="alert"></div>
@@ -82,6 +82,11 @@
   async function tryStored() {
     const s = localStorage.getItem(KEY_STORE);
     if (!s) return false;
+    $("f").hidden = true; // 覚えた鍵で開いている間は、入力の画面を出さない
+    const wait = document.createElement("p");
+    wait.textContent = "開いています…";
+    wait.setAttribute("role", "status");
+    $("gate").append(wait);
     try {
       const { iv, data } = await payload();
       const key = await crypto.subtle.importKey("raw", unb64(s), "AES-GCM", false, ["decrypt"]);
@@ -89,6 +94,10 @@
       return true;
     } catch {
       localStorage.removeItem(KEY_STORE); // パスワードが変わった
+      wait.remove();
+      $("f").hidden = false;
+      $("err").textContent = "パスワードが変わりました。新しいパスワードを入れてください";
+      $("pw").focus();
       return false;
     }
   }
@@ -102,7 +111,8 @@
       const key = await keyFrom($("pw").value, salt);
       let b;
       try { b = await open(key, iv, data); } catch {
-        $("err").textContent = "パスワードが違います";
+        $("err").textContent = "パスワードが違います。大文字・小文字、全角・半角を確かめてください。分からないときは、配った人に聞いてください";
+        $("pw").setAttribute("aria-invalid", "true");
         $("go").disabled = false;
         $("go").textContent = "開く";
         $("pw").select();
